@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PatientController extends Controller
 {
@@ -21,31 +22,50 @@ class PatientController extends Controller
 
     public function store(Request $request)
     {
-        Patient::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'specialization' => $request->specialization,
-            'license_number' => $request->license_number,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string|in:Male,Female,Other',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|string|email|max:255|unique:patients,email',
+            'emergency_contact' => 'nullable|string|max:20',
+            'medical_history' => 'nullable|string|max:1000',
         ]);
 
-        return response()->json(['message' => 'Patient added successfully'], 201);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $patient = Patient::create($validator->validated());
+
+        return response()->json(['message' => 'Patient added successfully', 'patient' => $patient], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $patient = Product::findOrFail($id);
-        $patient->first_name = $request->input('first_name');
-        $patient->last_name = $request->input('last_name');
-        $patient->specialization = $request->input('specialization');
-        $patient->license_number = $request->input('license_number');
-        $patient->phone = $request->input('phone');
-        $patient->email = $request->input('email');
-        $patient->save();
+        $patient = Patient::findOrFail($id);
 
-        return response()->json(['message' => 'Patient updated successfully', 'Patient' => $patient]);
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string|in:Male,Female,Other',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|string|email|max:255|unique:patients,email,' . $patient->id,
+            'emergency_contact' => 'nullable|string|max:20',
+            'medical_history' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $patient->update($validator->validated());
+
+        return response()->json(['message' => 'Patient updated successfully', 'patient' => $patient]);
     }
 
     public function destroy($id)
@@ -54,5 +74,4 @@ class PatientController extends Controller
         $patient->delete();
         return response()->json(['message' => 'Patient removed successfully']);
     }
-
 }

@@ -65,7 +65,7 @@ class UserController extends Controller
     // Register new user
     public function register(Request $request)
     {
-        // Validation rules
+        // Validation rules (same as before)
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -73,7 +73,7 @@ class UserController extends Controller
             'role' => 'required|string|in:admin,doctor,patient'
         ];
 
-        // Validate request data
+        // Validate request data (same as before)
         $validator = Validator::make($request->all(), $rules);
 
         // Return validation errors if validation fails
@@ -84,11 +84,14 @@ class UserController extends Controller
             ], 422);
         }
 
-        // Create new user
+        // Hash the password
+        $hashedPassword = Hash::make($request->password);
+
+        // Create new user with hashed password
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => $hashedPassword,
             'role' => $request->role,
         ]);
 
@@ -96,6 +99,7 @@ class UserController extends Controller
         return response()->json(['message' => 'User registered successfully'], 201);
     }
 
+    // User login
     public function login(Request $request)
     {
         // Validation rules (same as before)
@@ -122,17 +126,14 @@ class UserController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // **Security Warning:** Comparing plain text passwords is a security risk. If you haven't hashed passwords during registration, consider implementing password hashing for future registrations to mitigate this risk.
-
-        // Check password match (assuming passwords are stored in plain text)
-        if ($request->password !== $user->password) {
+        // Check password match
+        if (!Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // Return user details (assuming you want to return user information)
+        // Return user details
         return response()->json(['user' => $user], 200);
     }
-
 
     // User logout
     public function logout(Request $request)
