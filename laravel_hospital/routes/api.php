@@ -12,10 +12,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::get('/users', [UserController::class, 'index']); // Route to get all users
-Route::get('/users/{id}', [UserController::class, 'show']); // Route to update a user
-Route::put('/users/{id}', [UserController::class, 'update']); // Route to delete a user
-Route::delete('/users/{id}', [UserController::class, 'destroy']); // Route to delete a user
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+Route::put('/users/{id}', [UserController::class, 'update']);
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
