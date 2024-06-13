@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PatientController extends Controller
 {
@@ -18,6 +19,16 @@ class PatientController extends Controller
     {
         $patient = Patient::findOrFail($id);
         return response()->json($patient);
+    }
+
+    public function showEmail($email)
+    {
+        try {
+            $patient = Patient::where('email', $email)->firstOrFail();
+            return response()->json($patient);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Doctor not found.'], 404);
+        }
     }
 
     public function store(Request $request)

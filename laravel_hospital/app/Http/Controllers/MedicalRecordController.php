@@ -19,11 +19,23 @@ class MedicalRecordController extends Controller
         return response()->json($medicalRecord);
     }
 
+    public function showDoctor($doctorId)
+    {
+        $medicalRecord = Medical_Record::where('doctor_id', $doctorId)->get();
+        return response()->json($medicalRecord);
+    }
+
+    public function showPatients($doctorId)
+    {
+        $medicalRecord = Medical_Record::where('patient_id', $doctorId)->get();
+        return response()->json($medicalRecord);
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
+            'patient_id' => 'required',
+            'doctor_id' => 'required',
             'visit_date' => 'required|date',
             'diagnosis' => 'required',
             'treatment' => 'required',
@@ -40,8 +52,6 @@ class MedicalRecordController extends Controller
         $medicalRecord = Medical_Record::findOrFail($id);
 
         $validatedData = $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
             'visit_date' => 'required|date',
             'diagnosis' => 'required',
             'treatment' => 'required',

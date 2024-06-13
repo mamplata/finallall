@@ -22,6 +22,18 @@ class AppointmentController extends Controller
         return response()->json($appointment);
     }
 
+    public function showDoctor($doctorId)
+    {
+        $appointments = Appointment::where('doctor_id', $doctorId)->get();
+        return response()->json($appointments);
+    }
+
+    public function showPatients($patientId)
+    {
+        $appointments = Appointment::where('patient_id', $patientId)->get();
+        return response()->json($appointments);
+    }
+
     public function store(Request $request)
     {
         Appointment::create([
@@ -30,7 +42,7 @@ class AppointmentController extends Controller
             'appointment_date' => $request->appointment_date,
             'status' => $request->status,
             'reason' => $request->reason,
-            
+
         ]);
 
         return response()->json(['message' => 'Appointment added successfully'], 201);
@@ -39,8 +51,6 @@ class AppointmentController extends Controller
     public function update(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
-        $appointment->patient_id = $request->input('patient_id');
-        $appointment->doctor_id = $request->input('doctor_id');
         $appointment->appointment_date = $request->input('appointment_date');
         $appointment->status = $request->input('status');
         $appointment->reason = $request->input('reason');

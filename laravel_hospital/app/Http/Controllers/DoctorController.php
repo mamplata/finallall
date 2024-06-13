@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctor;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DoctorController extends Controller
 {
@@ -19,6 +20,16 @@ class DoctorController extends Controller
         return response()->json($doctor);
     }
 
+    public function showEmail($email)
+    {
+        try {
+            $doctor = Doctor::where('email', $email)->firstOrFail();
+            return response()->json($doctor);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Doctor not found.'], 404);
+        }
+    }
+
     public function store(Request $request)
     {
         Doctor::create([
@@ -28,7 +39,7 @@ class DoctorController extends Controller
             'license_number' => $request->license_number,
             'phone' => $request->phone,
             'email' => $request->email,
-            
+
         ]);
 
         return response()->json(['message' => 'Doctor added successfully'], 201);
@@ -54,5 +65,4 @@ class DoctorController extends Controller
         $doctor->delete();
         return response()->json(['message' => 'Doctor removed successfully']);
     }
-
 }

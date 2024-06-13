@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -22,15 +23,22 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-
     public function update(Request $request, $id)
     {
+        // Find the user first to get the current email
+        $user = User::findOrFail($id);
+
         // Validation rules
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:4',
-            'role' => 'required|string|in:admin,doctor,patient'
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id), // Ignore current user's email
+            ],
+            'role' => 'required|string|in:admin,doctor,patient,receptionist'
         ];
 
         // Validate request data
@@ -44,14 +52,13 @@ class UserController extends Controller
             ], 422);
         }
 
-        $user = User::findOrFail($id);
+        // Update user details
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        $user->password = $request->input('password');
         $user->role = $request->input('role');
         $user->save();
 
-        return response()->json(['message' => 'User updated successfully', 'product' => $user]);
+        return response()->json(['message' => 'User updated successfully', 'user' => $user]);
     }
 
     public function destroy($id)
@@ -70,7 +77,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:4',
-            'role' => 'required|string|in:admin,doctor,patient'
+            'role' => 'required|string|in:admin,doctor,patient,receptionist'
         ];
 
         // Validate request data (same as before)
